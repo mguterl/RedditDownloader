@@ -2,7 +2,7 @@ class Sources extends React.Component {
 	constructor(props){
 		super(props);
 		this.state = {available:[], active:[], filters: {}};
-		eel.api_get_sources()(r=>{
+		api('sources').then(r=>{
 			console.log(r);
 			this.setState({
 				available: r['available'],
@@ -76,7 +76,7 @@ class Sources extends React.Component {
 	saveAll(){
 		console.log('Saving all settings...');
 		// noinspection JSUnresolvedFunction
-		eel.api_save_sources(this.state.active)(n => {
+		api('sources', this.state.active, 'POST').then(n => {
 			if(n){
 				alertify.closeLogOnClick(true).success("Saved all Sources!")
 			}else{

@@ -9,6 +9,7 @@ class QueueReader:
 	def __init__(self, input_queue, stop_event):
 		"""
 		Create a new QueueReader, a simplified class for standardized reading from Queues.
+
 		:param input_queue: The Queue to read from
 		:param stop_event: The multiprocessing.Event, which will tell this reader to stop reading.
 		"""
@@ -18,6 +19,7 @@ class QueueReader:
 	def next(self, hang=True):
 		"""
 		Gets the next Element in this Loader's Queue, if there is one. Hangs until one is available.
+
 		:param hang: If False, throws a queue.Empty exception. Default True.
 		:return: The next element, or None if loading is finished.
 		"""

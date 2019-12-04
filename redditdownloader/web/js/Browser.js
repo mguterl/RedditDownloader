@@ -25,7 +25,7 @@ class Browser extends React.Component {
 				this.schedule_search(5000)
 			}
 		});
-		eel.api_searchable_fields()(n => {
+		api('searchable_fields').then(n => {
 			let fields = {};
 			n.forEach((p)=>{
 				fields[p] = true
@@ -42,7 +42,12 @@ class Browser extends React.Component {
 		});
 		let term = this.state.term;
 		console.log("Searching:", fields, term);
-		eel.api_search_posts(fields, term, this.state.page_size, page)(n => {
+		api('search', {
+			fields: JSON.stringify(fields),
+			term,
+			page_size: this.state.page_size,
+			page
+		}).then(n => {
 			console.log("Searched posts:", n);
 			let posts = n.results;
 			this.setState({posts, page, total: n.total});

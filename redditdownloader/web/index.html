@@ -8,7 +8,6 @@
 		<script src="js/libs/deepmerge.js" type="text/javascript"></script>
 		<script src="js/libs/showdown-1.8.6.min.js" type="text/javascript"></script><!-- Markdown converter. -->
 		<!--suppress HtmlUnknownTarget -->
-		<script type="text/javascript" src="/eel.js"></script>
 		<script src="js/Sources.js" type="text/babel"></script>
 		<script src="js/Home.js" type="text/babel"></script>
 		<script src="js/Browser.js" type="text/babel"></script>
@@ -50,5 +49,37 @@
 				callback(evt.value)
 			});
 		};
+
+		/**
+		 * Call the RMD API service via HTTP.
+		 * @param url
+		 * @param data
+		 * @param method
+		 * @returns {Promise<any>}
+		 */
+		window.api = async (url = '', data = {}, method='GET') => {
+			url = new URL(location.protocol + '//' + document.domain + ':' + location.port + '/api/' + url);
+			let body = JSON.stringify(data);
+			if (method === 'GET') {
+				body = null;
+				// noinspection JSValidateTypes
+				url.search = new URLSearchParams(data);
+			}
+			console.debug('API Query:', url);
+			// Default options are marked with *
+			const response = await fetch(url.toString(), {
+				method, // *GET, POST, PUT, DELETE, etc.
+				mode: 'cors', // no-cors, *cors, same-origin
+				cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+				credentials: 'same-origin', // include, *same-origin, omit
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				redirect: 'follow', // manual, *follow, error
+				referrer: 'no-referrer', // no-referrer, *client
+				body
+			});
+			return await response.json();
+		}
 	</script>
 </HTML>

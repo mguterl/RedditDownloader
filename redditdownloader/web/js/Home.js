@@ -7,7 +7,7 @@ class Home extends React.Component {
 
 	componentDidMount(){
 		window.eventStream.on('download_progress', prog => this.set_download_progress(prog));
-		eel.api_current_status()(r=>{
+		api('status').then(r=>{
 			this.setState({version: r['current_version']}, ()=> {
 				let last = window.lRead('last-update-check');
 				if(last){
@@ -60,7 +60,7 @@ class Home extends React.Component {
 	}
 
 	open_failed_urls(){
-		eel.get_failed()(res => {
+		api('failed_posts').then(res => {
 			console.debug('Failed Files:', res);
 			res.sort((a, b) => (a.subreddit > b.subreddit) ? 1 : -1);
 			this.setState({failed: res})

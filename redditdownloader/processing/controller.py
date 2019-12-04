@@ -8,7 +8,8 @@ from processing.redditloader import RedditLoader
 from processing.downloader import Downloader
 from processing.post_processing import Deduplicator
 from processing.wrappers import ProgressManifest
-from multiprocessing import RLock
+from multiprocessing import RLock, Queue, Event
+from processing.wrappers.queue_reader import QueueReader
 
 
 class RMDController(threading.Thread):
@@ -20,11 +21,13 @@ class RMDController(threading.Thread):
 		self.sources = source_patterns
 		self.sources = self.load_sources()
 		self.db_lock = RLock()
+		self.stop_event = Event()  # This is a shared mp.Event, set when all processes should finish.
+		self.event_queue = Queue()
 		# initialize Loader
-		self.loader = RedditLoader(sources=self.sources, settings_json=settings.to_json(), db_lock=self.db_lock)
+		self.loader = RedditLoader(sources=self.sources, settings_json=settings.to_json(), db_lock=self.db_lock, stop_event=self.stop_event)
 		self.deduplicator = Deduplicator(
 			settings_json=settings.to_json(),
-			stop_event=self.loader.get_stop_event(),
+			stop_event=self.stop_event,
 			db_lock=self.db_lock
 		)
 		self._downloaders = self._create_downloaders()
@@ -38,7 +41,7 @@ class RMDController(threading.Thread):
 		[t.join() for t in self._all_processes]
 
 	def stop(self):
-		self.loader.get_stop_event().set()
+		self.stop_event.set()
 		for d in self._downloaders:
 			d.terminate()
 		self.loader.terminate()
@@ -59,8 +62,8 @@ class RMDController(threading.Thread):
 		Waits for the "refresh delay" configured in the settings, or exits early if processing finished before then.
 		:return: True if the delay was fully awaited, or False if processing has completed.
 		"""
-		if not self.loader.get_stop_event().is_set():
-			self.loader.get_stop_event().wait(settings.get("threading.display_refresh_rate"))
+		if not self.stop_event.is_set():
+			self.stop_event.wait(settings.get("threading.display_refresh_rate"))
 			return True
 		return False
 
@@ -71,7 +74,7 @@ class RMDController(threading.Thread):
 				reader=self.loader.get_reader(),
 				ack_queue=self.loader.get_ack_queue(),
 				settings_json=settings.to_json(),
-				db_lock = self.db_lock
+				db_lock=self.db_lock
 			)
 			dls.append(tp)
 		return dls

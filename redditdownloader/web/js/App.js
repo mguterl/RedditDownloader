@@ -28,7 +28,7 @@ class App extends React.Component {
 				'<br><br>Please refresh this window once RMD has been restarted.').then(()=>{location.reload()})
 		}, 5000);
 
-		eel.download_status()().then((r)=>{
+		api('status').then((r)=>{
 			let page = this.state.page;
 			let name = this.pages[page][1];
 			console.log('RMD running status: ', r);
@@ -65,7 +65,7 @@ class App extends React.Component {
 		if(this.state.downloading)
 			return;
 		console.log('Starting RMD download process!');
-		eel.start_download()(n => {
+		api('download', null, 'PUT').then(n => {
 			if (n) {
 				clearTimeout(this.check_timer);
 				this.checkStatus();

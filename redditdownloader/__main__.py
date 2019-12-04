@@ -8,13 +8,15 @@ import static.console as console
 import static.metadata as meta
 from sources import DirectInputSource
 from interfaces.terminal import TerminalUI
-from interfaces.eelwrapper import WebUI
+from interfaces.webui import WebUI
 import tests.runner
 import sql
 from tools import ffmpeg_download
 import static.filesystem as fs
 import re
 import logging
+import eventlet
+eventlet.monkey_patch()
 
 
 parser = argparse.ArgumentParser(

@@ -6,7 +6,7 @@ class Settings extends React.Component {
 	}
 
 	componentDidMount() {
-		eel.api_get_settings()(r=>{
+		api('settings').then(r=>{
 			this.setState({
 				settings: r
 			});
@@ -20,7 +20,7 @@ class Settings extends React.Component {
 			return;
 		}
 		console.log('Saving all settings...');
-		eel.api_save_settings(this.changes)(n => {
+		api('settings', this.changes, 'POST').then(n => {
 			if(n){
 				if('interface.host' in this.changes || 'interface.port' in this.changes){
 					alertify
@@ -119,7 +119,8 @@ class SettingsField extends React.Component {
 
 	componentDidMount() {
 		if(this.ele_id() === 'auth.refresh_token') {
-			eel.get_authed_user()(username => {
+			api('user').then(data => {
+				let username = data.user;
 				console.log('Got authed username:', username);
 				this.setState({username})
 			})
@@ -156,7 +157,7 @@ class SettingsField extends React.Component {
 	open_oauth(){
 		console.log('Opening oauth.');
 		let win = window.open("", '_blank');
-		eel.api_get_oauth_url()(data => {
+		api('oauth_url').then(data => {
 			console.log('oAuth data', data);
 			let url = data['url'];
 			if(!url){

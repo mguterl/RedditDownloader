@@ -7,7 +7,7 @@ import sql
 
 
 class RedditLoader(multiprocessing.Process):
-	def __init__(self, sources, settings_json, db_lock):
+	def __init__(self, sources, settings_json, db_lock, stop_event):
 		""" This is a daemon Loader class, which facilitates loading from multiple Sources
 		 	and safely submitting their Posts to an internal queue.
 		"""
@@ -17,7 +17,7 @@ class RedditLoader(multiprocessing.Process):
 		self._queue = multiprocessing.Queue(maxsize=2500)
 		self._open_ack = set()
 		self._ack_queue = multiprocessing.Queue()
-		self._stop_event = multiprocessing.Event()  # This is a shared mp.Event, set when this reader should be done.
+		self._stop_event = stop_event
 		self._reader = QueueReader(input_queue=self._queue, stop_event=self._stop_event)
 		self._session = None
 		self._lock = db_lock
@@ -131,9 +131,6 @@ class RedditLoader(multiprocessing.Process):
 
 	def get_ack_queue(self):
 		return self._ack_queue
-
-	def get_stop_event(self):
-		return self._stop_event
 
 	def _push_url_list(self, url_list, handle_acks=True):
 		"""
