@@ -1,0 +1,1 @@
+0 */6 * * * /usr/local/bin/python /Run.py --settings /config/settings.json >> /var/log/cron.log 2>&1
