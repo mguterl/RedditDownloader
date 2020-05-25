@@ -1,0 +1,14 @@
+FROM python:3.7-slim
+
+# Install ffmpeg so that it doesn't install on every run
+RUN apt-get update && \
+    apt-get -y install -qq --force-yes ffmpeg cron
+
+COPY redditdownloader ./redditdownloader
+COPY requirements.txt /requirements.txt
+COPY Run.py /Run.py
+COPY run.sh /run.sh
+
+RUN pip install -r ./requirements.txt
+
+CMD ["/run.sh"]
